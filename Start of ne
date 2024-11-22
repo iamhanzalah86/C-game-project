@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <string>
 #include <windows.h>
@@ -7,15 +6,161 @@
 #include <ctime>
 #include <queue>
 #include <stack>
+
  using namespace std;
  
      // Global variables
      int skip = 0, ret, exp, no, quest, ex, hp, mon, att = 1, plstr = 8, ophp, opend, opstr, opatt, sinp,
-            oppo = 0, monid,
-            plend = 8, opstun = 0, stun, unspentskp = 8;
+            oppo = 0, monid,bleed=0,
+            plend = 8, opstun = 0, stun, unspentskp = 8,damageMultiplier=0;
     string op;
     
-    
+    	queue <int> beh;
+class behaviour {
+	public:
+	int thr() {
+		//random 30% chance to cause 1.5 damage
+        int multi=1;
+		srand(time(0)); // Seed the random number generator
+        int knifethrust = 1; // Default damage multiplier
+        if (rand() % 100 < 30) { 
+            multi = 1.5;   
+        }
+
+        knifethrust =(int)(1 + (opstr * multi * 1.15) - (plend * 0.1));
+        return knifethrust;
+	}
+ int slash() {
+        srand(time(0)); // Seed the random number generator
+int dmg;
+         damageMultiplier = 1; // Default damage multiplier
+        if (rand() % 100 < 5) { // 5% chance
+            damageMultiplier = 2; // Apply 2x damage
+        }
+        
+        dmg = (int)(1 + (opstr * damageMultiplier * 1.0) - (plend * 0.1));
+        damageMultiplier=1;
+		return dmg;
+    }
+	int lacerate(){
+		//70% chance to hit and 50% chance to bleed along with 20% more damage than slash
+		int dmg;
+		  srand(time(0));
+		  if (rand() % 100 < 70){
+		  if (rand() % 100 < 50){
+		  	bleed=3;
+		  	
+		  }
+		  dmg=static_cast<int>(slash()*1.2);
+		  
+		  }
+		  
+		  return dmg;
+	}
+	int bite(){
+		int dmg= (int)(1 + (opstr * damageMultiplier * 1.2) - (plend * 0.1));
+		
+		return dmg;
+	}
+	int rush(){
+		int dmg= (int)(1 + (opstr * damageMultiplier * 1.0) - (plend * 0.1));
+		return dmg;
+	}
+	int swipe(){
+		int dmg = (int)(4 + (opstr * damageMultiplier * 1.0) - (plend * 0.1));
+		return dmg;
+	}
+	int kslash(){
+		
+	//	return dmg;
+	}
+
+		
+		int passive(){
+			int x;
+		
+	
+				switch(monid){
+					case 1:
+			        	x=lacerate();
+			         	beh.push(x);			
+						beh.push(x);
+						x=slash();
+						beh.push(x);  
+						x=slash();
+						beh.push(x);
+						x=thr();
+						beh.push(x);
+	                	x=lacerate();
+				        beh.push(x);			
+						beh.push(x);
+						x=slash();
+						beh.push(x);
+						x=slash();
+						beh.push(x);
+						x=thr();
+						beh.push(x);
+						x=lacerate();
+				        beh.push(x);			
+						beh.push(x);
+						x=slash();
+						beh.push(x);
+						x=slash();
+						beh.push(x);
+						x=thr();
+						beh.push(x);
+						
+						break;
+						case 2:
+							x=bite();
+							beh.push(x);
+							x=slash();
+							beh.push(x);
+							x=rush();
+							beh.push(x);
+							x=slash();
+							beh.push(x);
+							x=bite();
+							beh.push(x);
+							x=slash();
+							beh.push(x);
+							x=bite();
+							beh.push(x);
+							x=slash();
+							beh.push(x);
+							x=rush();
+							beh.push(x);
+							x=bite();
+							beh.push(x);
+							x=slash();
+							beh.push(x);
+							x=rush();
+							beh.push(x);
+							x=bite();
+							beh.push(x);
+							x=slash();
+							beh.push(x);
+							x=rush();
+							beh.push(x);
+							x=bite();
+							beh.push(x);
+							x=slash();
+							beh.push(x);
+							x=rush();
+							beh.push(x);
+						break;
+						case 3:
+						break;
+						case 4:
+						break;
+						case 5:
+						break;
+						default:
+							break;
+				}
+			}
+	
+};
     class skilltr  {
     protected:
            string s;
@@ -383,34 +528,87 @@ public:
         }
     }
 };
+//linked list implementation for animation.. mainscreen and sworddd animationnss
+struct Node {
+    string frame;
+    Node* next;
+
+    Node(string f) : frame(f), next(NULL) {} // Use NULL instead of nullptr
+};
+
+class Animation {
+private:
+    Node* head;
+
+public:
+    Animation() : head(NULL) {} // Initialize with NULL
+
+    ~Animation() {
+        // Clean up memory
+        Node* current = head;
+        while (current) {
+            Node* temp = current;
+            current = current->next;
+            delete temp;
+        }
+    }
+
+    void addFrame(const string& frame) {
+        Node* newNode = new Node(frame);
+        if (!head) {
+            head = newNode;
+        } else {
+            Node* temp = head;
+            while (temp->next) {
+                temp = temp->next;
+            }
+            temp->next = newNode;
+        }
+    }
+
+    void play(int delayMs = 500) const {
+        Node* current = head;
+        while (current) {
+            clearScreen();
+            cout << current->frame << endl;
+            Sleep(delayMs); // Delay in milliseconds
+            current = current->next;
+        }
+    }
+
+    static void clearScreen() {
+        system("CLS"); 
+    }
+};
 
 class Gam {
 public:
 
-string swordd = "|\\ \n| \\ \n|  \\ \n \\  \\ \n  \\  \\ \n   \\  \\ \n    \\  \\ \n     \\  \\ \n      \\  \\ \n       \\  \\ \n        \\  \\ \n         \\  \\ \n          \\__\\ \n            \\\\ \n             \\\\ \n              \\\\ \n               \\\\ \n                \\\\ \n                 \\\\ \n";
-string sword="   /|   \n  / |   \n /  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |__|   \n   ||  \n   ||  \n   ||  \n   ||   \n   ||  \n   ||  \n  (__) ";
-string swordl="  ___________________________\n /                           |__________________|\n/____________________________|------------------|\n";
+//string swordd = "|\\ \n| \\ \n|  \\ \n \\  \\ \n  \\  \\ \n   \\  \\ \n    \\  \\ \n     \\  \\ \n      \\  \\ \n       \\  \\ \n        \\  \\ \n         \\  \\ \n          \\__\\ \n            \\\\ \n             \\\\ \n              \\\\ \n               \\\\ \n                \\\\ \n                 \\\\ \n";
+//string sword="   /|   \n  / |   \n /  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |__|   \n   ||  \n   ||  \n   ||  \n   ||   \n   ||  \n   ||  \n  (__) ";
+//string swordl="  ___________________________\n /                           |__________________|\n/____________________________|------------------|\n";
 
-    void ma(Skshot sks, Skcall SKK) {
-
+    void ma(Skshot sks, Skcall SKK,behaviour behave) {
         mainscreen();
-        cout<<endl;
-        cout<<endl;
-        cout<<endl;
-        cout<<endl;
-        cout<<("WELCOME TO THE CITY OF AAGON.")<<endl;
-        cout<<(
-                "YOU ARE AN ASPIRING ADVENTURER HOPING TO GET THE MEDALATION OF LEO THE BRAVEST OF ALL HEROES.")<<endl;
-        cout<<("Now DEFEAT THE BEASTS OF DARKNESS FOR YOUR OWN GREED.")<<endl;
+        cout<<"\n\n\n\n\n\n\n\n";
+        HANDLE y = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleTextAttribute(y, 4);
+        cout<<"==================================================================================================\n";
+        cout<<"== WELCOME TO THE CITY OF AAGON.\t\t\t\t\t\t\t\t=="<<endl;
+        cout<<"== YOU ARE AN ASPIRING ADVENTURER HOPING TO GET THE MEDALATION OF LEO THE BRAVEST OF ALL HEROES.=="<<endl;
+        cout<<"== Now DEFEAT THE BEASTS OF DARKNESS FOR YOUR OWN GREED.\t\t\t\t\t=="<<endl;
+        cout<<"==================================================================================================\n";
         cin.get(); // wait for user input
         clearScreen();
+        HANDLE T = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleTextAttribute(T, 7);
         stun = 0;
 
         do {
             do {
-                cout<<("WHAT WOULD YOU LIKE TO DO?")<<endl;
-                cout<<("1. GO TO THE HEALER")<<endl;
-                cout<<("2. TAKE A QUEST")<<endl;
+                cout<<"WHAT WOULD YOU LIKE TO DO?"<<endl;
+                cout<<"1. GO TO THE HEALER"<<endl;
+                cout<<"2. TAKE A QUEST"<<endl;
                 if (unspentskp >= 1) {
                     cout<<("3. CHECK CHARACTER SHEET")<<endl;
                 }
@@ -469,7 +667,7 @@ string swordl="  ___________________________\n /                           |____
             } while (ex == 1 || ex == 2 || ex == 3 || ex == 4);
 
             clearScreen();
-
+	    behave.passive();
             // Main game loop
             while (quest > 0 && ophp > 0 && hp > 0) {
                 srand(static_cast<unsigned>(time(NULL)));
@@ -480,10 +678,7 @@ string swordl="  ___________________________\n /                           |____
                 char ch;
                 cin>>ch;
 
-                // Determine opponent's attack based on random number
-                if (random == 1) {
-                    opatt = (int) (1 + (opstr * (1.15)) - (plend * (0.1)));
-                }
+              
 
                 // Player's turn
                 if (ch == 'a' || ch == 'A') {
@@ -491,6 +686,8 @@ string swordl="  ___________________________\n /                           |____
                     cin.get(); // wait for user input
                     if (skip != 1) {
                         anim();
+                        HANDLE t = GetStdHandle(STD_OUTPUT_HANDLE);
+                        SetConsoleTextAttribute(t, 7);
                     }
                 } else if (ch == 's' || ch == 'S') {
                     // Player chooses a skill
@@ -522,7 +719,12 @@ string swordl="  ___________________________\n /                           |____
                     } while (sinp > 4 || sinp < 0);
                 }
                 clearScreen();
-
+				  // Determine opponent's attack based on random number
+                if (random == 1) {
+					
+                    opatt = beh.front();
+                    beh.pop();
+                }
                 // Handle stun effect on player
                 if (stun > 0) {
                     opatt = 0;
@@ -540,18 +742,27 @@ string swordl="  ___________________________\n /                           |____
                     
                     opstun--;
                 }
-
+				
                 // Update opponent's health based on player's attack
                 ophp = ophp - att;
                 cout<<"You HIT THE ENEMY FOR " << att << " DAMAGE\n\n"<<endl;
-
+if(bleed>0){
+	
+	hp=hp-10;
+	cout<<"You bled for 10 HP"<<endl;
+	bleed--;
+}
                 // Update player's health based on opponent's attack
                 hp = hp - opatt;
                 cout<<"THE OPPONENT HIT YOU FOR " << opatt <<" DAMAGE\n\n"<<endl;
             }
-            skip--;
-            quest--;
+            while(beh.front()){
+            	beh.pop();
+			}
+            skip=0;
+            quest=0;
             unspentskp += exp;
+            no=0;
         } while (ex != 6);
 
         cout<<("CONGRATULATIONS NOW YOU HAVE BECOME A BEAST")<<endl;
@@ -559,39 +770,52 @@ string swordl="  ___________________________\n /                           |____
     }
 
     void anim() {
-        clearScreen();
-        cout<<(sword);
-        cin.get(); // wait for user input
-        clearScreen();
-        cout<<(swordd);
-        cin.get(); // wait for user input
-        clearScreen();
-        cout<<endl;
-        cout<<endl;
-        cout<<endl;
-        cout<<endl;
-        cout<<endl;
-        cout<<endl;
-        cout<<endl;
-        cout<<endl;
-        cout<<endl;
-        cout<<endl;
-        cout<<(swordl);
-        cin.get(); // wait for user input
-        clearScreen();
-        skip++;
+    	 Animation swordAnimation;
+    	 //colors handling 
+    	 HANDLE y = GetStdHandle(STD_OUTPUT_HANDLE);
+         SetConsoleTextAttribute(y, 4);
+    	 swordAnimation.addFrame("|\\ \n| \\ \n|  \\ \n \\  \\ \n  \\  \\ \n   \\  \\ \n    \\  \\ \n     \\  \\ \n      \\  \\ \n       \\  \\ \n        \\  \\ \n         \\  \\ \n          \\__\\ \n            \\\\ \n             \\\\ \n              \\\\ \n               \\\\ \n                \\\\ \n                 \\\\ \n");
+    	 swordAnimation.addFrame("   /|   \n  / |   \n /  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |  |  \n |__|   \n   ||  \n   ||  \n   ||  \n   ||   \n   ||  \n   ||  \n  (__) ");
+    	 swordAnimation.addFrame("  ___________________________\n /                           |__________________|\n/____________________________|------------------|\n");
+    	 swordAnimation.play(500); // delay off how much it will play per frame
+        //clearScreen();
+        //cout<<(sword);
+        //cin.get(); // wait for user input
+        //clearScreen();
+        //cout<<(swordd);
+        //cin.get(); // wait for user input
+        //clearScreen();
+        //cout<<endl;
+        //cout<<endl;
+        //cout<<endl;
+        //cout<<endl;
+        //cout<<endl;
+        //cout<<endl;
+        //cout<<endl;
+        //cout<<endl;
+        //cout<<endl;
+        //cout<<endl;
+        //cout<<(swordl);
+        //cin.get(); // wait for user input
+        //clearScreen();
+        skip++; // skip animation for other than 1st attack 
     }
 
     void mainscreen() {
-       cout<<"\n\n\n\n\n\n\n\n";
-       cout<<setw(80) << "************************************" <<endl;
-       cout<<setw(80) << "*                                  *" <<endl;
-       cout<<setw(80) << "*          WELCOME TO THE          *" <<endl;
-       cout<<setw(80) << "*               GAME!              *" <<endl;
-       cout<<setw(80) << "*                                  *" <<endl;
-       cout<<setw(80) << "************************************"<<endl;
-       cout<<"PRESS ENTER TO CONTINUE.... ";
-       cin.get();
+       Animation mainScreenAnimation;
+       mainScreenAnimation.addFrame("\n\n\n\n\n\n\n\n\n\t\t\t\t\t************************************\n""\t\t\t\t\t*                                  *\n""\t\t\t\t\t*          WELCOME TO THE          *\n""\t\t\t\t\t*               GAME!              *\n""\t\t\t\t\t*                                  *\n""\t\t\t\t\t************************************" );
+       mainScreenAnimation.play(1000);
+       //handle colors of text
+        HANDLE t = GetStdHandle(STD_OUTPUT_HANDLE);
+        SetConsoleTextAttribute(t, 7);
+       //cout<<setw(80) << "************************************" <<endl;
+       //cout<<setw(80) << "*                                  *" <<endl;
+       //cout<<setw(80) << "*          WELCOME TO THE          *" <<endl;
+       //cout<<setw(80) << "*               GAME!              *" <<endl;
+       //cout<<setw(80) << "*                                  *" <<endl;
+       //cout<<setw(80) << "************************************"<<endl;
+       //cout<<"PRESS ENTER TO CONTINUE.... ";
+       //cin.get();
     }
 
     void chrscr() {
@@ -671,76 +895,12 @@ string swordl="  ___________________________\n /                           |____
     }
 
 };
-class behaviour : public Gam{
-	int thr() {
-		//random 30% chance to cause 1.5 damage
-        srand(time(0)); // Seed the random number generator
-        int knifethrust = 1; // Default damage multiplier
-        if (rand() % 100 < 30) { 
-            knifethrust = 1.5;   
-        }
 
-        opatt = static_cast<int>(1 + (opstr * knifethrust * 1.15) - (plend * 0.1));
-        return knifethrust;
-	}
- int slash() {
-        srand(time(0)); // Seed the random number generator
-
-        int damageMultiplier = 1; // Default damage multiplier
-        if (rand() % 100 < 5) { // 5% chance
-            damageMultiplier = 2; // Apply 2x damage
-        }
-        
-        opatt = static_cast<int>(1 + (opstr * damageMultiplier * 1.0) - (plend * 0.1));
-        return damageMultiplier;
-    }
-	int lacerate(){
-		//70% chance to hit and 50% chance to bleed along with 20% more damage than slash
-	}
-	int screech(){
-		//next attack does 2x damage
-	}
-	int headblow(){
-		//70%chanxce to hit 20% chance to stun 1.5x damage
-	}
-	public:
-		void passive(){
-			int x;
-			queue <int> pbeh;
-			bool full=true;
-			if(ophp!=1+(opstr*2)+(opend*4)){
-				full=false;
-			}
-			if(!full){
-				active();
-			}
-			else{
-				switch(monid){
-					case 1:
-						x=thr();
-						pbeh.push(x);
-						break;
-						case 2:
-						break ;
-						case 3:
-						break;
-						case 4:
-						break;
-						case 5:
-						break;
-						default;
-				}
-			}
-		}
-		void active(){
-	queue <int> abeh;
-			
-		}
-};
 int main() {
 	Gam g;
     Skshot sks;
     Skcall SKK;
-    g.ma(sks,SKK);
+    behaviour be;
+    g.ma(sks,SKK,be);
     return 0;
 }
